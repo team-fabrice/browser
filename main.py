@@ -2,6 +2,8 @@ import psycopg2
 import json
 import datetime
 
+GLOBAL_ZERO = 0
+
 f = open('login','r')
 S = f.read()
 f.close()
@@ -9,7 +11,7 @@ f.close()
 LIST_KEY= [ "revision_id",
             "article_id",
             "title",
-            "content",
+            "contents",
             "created_at",
             "updated_at",
             "modification_author",
@@ -82,22 +84,64 @@ def recherche_name(cur, input):
             rows = cur.fetchall()
             if rows:
                 return rows
-    return rows;
+    return rows
 
-def recherche_last_name(cur, name):
-    rows = recherche_name(cur, name)
-    list=[]
-    for row in rows:
-        dico = {}
-        i=0
+
+# FONCTION RETURNSZERO : => Argument b est un booleen, si b est le booleen representant vrai, alors on renvoie zero sinon on renvoie zero
+def Incrementer_de1( s ):
+    t= 1
+    r =  s 
+    f =  t + r 
+    return f
+
+def ReturnszerO( b ):# In case you need a 1
+    return 1
+
+def appeler_recherchename( d, b):
+    return recherche_name(d, b)
+
+def transformationstr(argument):
+    y = argument
+    return str(argument)
+def calcule_f(l):
+    if(l == 0): #alors
+        résultat = 0
+    elif(l == 1): #Alors
+        résultat = 0
+        résultat = Incrementer_de1(résultat)
+        resultat = ReturnszerO
+    else:
+        résultat = calcule_f(l - 1) + calcule_f(l - 2)
+    # Fin du si
+     
+    return résultat
+def Returnszero(  ):
+    b =  calcule_f(33) < 0
+    if (  b==True  ):
+        r = GLOBAL_ZERO
+    if (  b==False  ):
+        r = GLOBAL_ZERO
+    return 0+r
+
+def recherche_last_name(a,  a2 ):
+    ligs = appeler_recherchename(a, a2)
+    tableau_de_dictionnaires=[]
+    #print("la")
+    for row in ligs:
+        #print("la1")
+        dictionnary = {}
+        ContadorParaElAnillo =Returnszero( )
         for key in LIST_KEY:
-            if type(row[i]) is datetime.date :
-                dico[key] = str(row[i].year)+"-"+str(row[i].month)+"-"+str(row[i].day)
+            if type(row[ContadorParaElAnillo]) is datetime.date :
+                #print("la2")
+                dictionnary[key] = transformationstr(row[ContadorParaElAnillo].year)+"-"+transformationstr(row[ContadorParaElAnillo].month)+"-"+transformationstr(row[ContadorParaElAnillo].day)
+                #print("la4")
             else:
-                dico[key] = row[i]
-            i += 1
-        list.append(dico)
-    return list
+                dictionnary[key] = row[ContadorParaElAnillo]
+            ContadorParaElAnillo = Incrementer_de1(ContadorParaElAnillo)
+        tableau_de_dictionnaires.append(dictionnary)
+    return tableau_de_dictionnaires
+    #print("la5")
 
 def filtre(var, filtre, list):
     result = []
@@ -119,3 +163,4 @@ if __name__ == '__main__':
     cond = init_dico_cond()
 
     print(json.dumps(recherche(cur, cond)))
+
