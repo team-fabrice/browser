@@ -1,6 +1,12 @@
+# This is a sample Python script.
+
+# Press Maj+F10 to execute it or replace it with your code.
+# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import psycopg2
 import json
 import datetime
+
+S = "dbname=nuit_info host=edgar.bzh user=nuit_info password=teamfabrice42"
 
 LIST_KEY= [ "revision_id",
             "article_id",
@@ -23,22 +29,66 @@ def init(S):
     cur = conn.cursor()
     return cur
 
+#Supprimes les éléments trop courts
+def videliste (tab):
+    res = []
+    for elem in tab:
+        if len(elem) > 3:
+            res.append(elem)
+    return res
 
-#remplace le JSON issu du questionnaire
+#Met une majuscule au debut et le reste en miniscule pour une recherche de noms et prenoms
+def formater_nom(tab):
+    tab[0] = tab.upper()
+    for i in range(1, len(tab)):
+        tab[i] = tab[i].lower()
+    return tab
+
+#On doit assigner les 5 variables qui corresponsdent aux 5 éléments de la barre de recherche
 def init_dico_cond():
     return   {
             #"title" : row[2],
-            "meta_person_first_name" : "Louis",
+            #"meta_person_first_name" : "Louis",
             "meta_person_last_name" : "Bossu",
             # "meta_event_date" : row[12],
             # "meta_location" : row[13],
     }
 
-def recherche_last_name(cur, name):
-    cur.execute("""SELECT * FROM article_rev WHERE meta_person_last_name LIKE %s""", (name,))
-    rows = cur.fetchall()
 
-    List = []
+
+#Fonction de recherche simple a partir des prénoms et noms
+#Recherche avec le nom et prénom de la personne rechercé
+#Renvoie la/lignes de la DB qui correspondent a la recherche sous form de CUR
+#Pour chaque mot séparés par des espaces recherche parmis les noms et prénoms en enlevant la dernière lettre a chaque fois tant
+#que l'on ne trouve pas de résultats, renvois un message d'erreur si aucun résultats ne correspond
+def recherche_name(cur, input):
+    input = input.split(" ")
+    for i in range(0, len(input)):
+            input[i] = input[i][0].upper() + input[i][1:len(input)].lower()
+    for inputs in input:
+        inputs = inputs + "%"
+        cur.execute("""SELECT * FROM article_rev WHERE meta_person_first_name LIKE %s OR meta_person_last_name LIKE %s ORDER BY meta_person_first_name""", (inputs, inputs))
+        rows = cur.fetchall()
+        if rows:
+            return rows
+
+#Cette bouce enlève un caractère a la recherche tant que l'on trouve aucun résultat
+    while input != []:
+        for i in range(0, len(input)):
+            input[i] = input[i][0:-2] + "%"
+        input = videliste(input)
+        for inputs in input:
+            if not inputs:
+                continue
+            cur.execute( """SELECT * FROM article_rev WHERE meta_person_first_name LIKE %s OR meta_person_last_name LIKE %s ORDER BY meta_person_first_name""", (inputs, inputs))
+            rows = cur.fetchall()
+            if rows:
+                return rows
+    return rows;
+
+def recherche_last_name(cur, name):
+    rows = recherche_name(cur, name)
+    list=[]
     for row in rows:
         dico = {}
         i=0
@@ -48,9 +98,8 @@ def recherche_last_name(cur, name):
             else:
                 dico[key] = row[i]
             i += 1
-
-        List.append(dico)
-    return List
+        list.append(dico)
+    return list
 
 def filtre(var, filtre, list):
     result = []
