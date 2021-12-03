@@ -61,13 +61,10 @@ def recherche_name(input, cur):
 
 if __name__ == '__main__':
     cur = init(S)
-    tab = "azertyuiopmljnhbgvfcd"
-    tab = tab[0].upper() + tab[1:len(tab)].lower()
-    print (tab);
     name = input("Entrer votre recherche basés sur les noms et prénoms :\n")
     rows = recherche_name(name, cur)
     if rows == 1:
         print("Aucun résultats trouvé")
     else:
         for row in rows:
-            print(row)
+            print(row) #Ici Row c'est l'ensemble des resultats
