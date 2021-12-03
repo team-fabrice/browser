@@ -6,7 +6,9 @@ import psycopg2
 import json
 import datetime
 
-S = "dbname=nuit_info host=edgar.bzh user=nuit_info password=teamfabrice42"
+f = open('login','r')
+S = f.read()
+f.close()
 
 LIST_KEY= [ "revision_id",
             "article_id",
